@@ -26,4 +26,19 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DTOs\Auth\" />
+    <Folder Include="DTOs\Incidents\" />
+    <Folder Include="DTOs\Maintenance\" />
+    <Folder Include="DTOs\Users\" />
+    <Folder Include="Data\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="Middlewares\" />
+    <Folder Include="Migrations\" />
+    <Folder Include="Repositories\Interfaces\" />
+    <Folder Include="Repositories\Implementations\" />
+    <Folder Include="Services\Interfaces\" />
+    <Folder Include="Services\Implementations\" />
+  </ItemGroup>
+
 </Project>
