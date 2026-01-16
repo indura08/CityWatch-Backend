@@ -31,7 +31,6 @@
     <Folder Include="DTOs\Incidents\" />
     <Folder Include="DTOs\Maintenance\" />
     <Folder Include="DTOs\Users\" />
-    <Folder Include="Helpers\" />
     <Folder Include="Middlewares\" />
     <Folder Include="Migrations\" />
     <Folder Include="Repositories\Interfaces\" />
