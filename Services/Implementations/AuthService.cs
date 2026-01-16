@@ -32,6 +32,9 @@ namespace cityWatch_Project.Services.Implementations
                 return new LoginServiceResponse
                 {
                     Token = string.Empty,
+                    Error = true,
+                    ErrorMessage = "Cannot find the user"
+
                 };
             }
 
@@ -40,12 +43,17 @@ namespace cityWatch_Project.Services.Implementations
                 return new LoginServiceResponse
                 {
                     Token = string.Empty,
+                    Error = true,
+                    ErrorMessage = "Wrong credentials"
+                    
                 };
             }
 
             return new LoginServiceResponse
             {
                 Token = _jwtTokenGenerator.TokenGenerator(user),
+                Error = false,
+                ErrorMessage = ""
             };
         }
 
