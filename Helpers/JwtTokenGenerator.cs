@@ -27,7 +27,7 @@ namespace cityWatch_Project.Helpers
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Secret));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Key));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -35,7 +35,7 @@ namespace cityWatch_Project.Helpers
                 issuer: _settings.Issuer,
                 audience: _settings.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_settings.ExpiryMinutes),
+                expires: DateTime.UtcNow.AddMinutes(_settings.AccesstokenExpiryMinutes),
                 signingCredentials: creds
             );
 
