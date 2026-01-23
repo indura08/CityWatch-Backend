@@ -5,7 +5,9 @@ using cityWatch_Project.Enums;
 using cityWatch_Project.Helpers;
 using cityWatch_Project.Models;
 using cityWatch_Project.Repositories.Implementations;
+using cityWatch_Project.Repositories.Interfaces;
 using cityWatch_Project.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace cityWatch_Project.Services.Implementations
 {
@@ -15,13 +17,15 @@ namespace cityWatch_Project.Services.Implementations
         private readonly UserRepository _userRepo;
         private readonly PasswordHasher _passwordHasher;
         private readonly JwtTokenGenerator _jwtTokenGenerator;
+        private readonly IRefreshTokenRepository _refreshTokenrepo;
 
-        public AuthService(MainDBContext dbConetext, UserRepository repo, PasswordHasher passwordHasher, JwtTokenGenerator jwtTokenGenerator)
+        public AuthService(MainDBContext dbConetext, IRefreshTokenRepository refreshTokenRepository ,UserRepository repo, PasswordHasher passwordHasher, JwtTokenGenerator jwtTokenGenerator)
         {
             _dbConetext = dbConetext;
             _passwordHasher = passwordHasher;
             _jwtTokenGenerator = jwtTokenGenerator;
             _userRepo = repo;
+            _refreshTokenrepo = refreshTokenRepository;
         }
 
         public async Task<LoginServiceResponse> LoginAsync(LoginDto logingDto)
@@ -51,16 +55,17 @@ namespace cityWatch_Project.Services.Implementations
                 };
             }
 
-            var refreshToken = new RefreshToken
+            await _refreshTokenrepo.DeleteRefreshTokenByUserID(user.UserID);
+
+            var newRefreshToken = new RefreshToken
             {
                 Id = Guid.NewGuid(),
-                UserID = user.UserID,
                 Token = _jwtTokenGenerator.GenerateRefreshToken(),
+                UserID = user.UserID,
                 ExpiresOn = DateTime.UtcNow.AddDays(7)
             };
 
-            _dbConetext.RefreshTokens.Add(refreshToken);
-            await _dbConetext.SaveChangesAsync();
+            await _refreshTokenrepo.AddAsync(newRefreshToken);
 
 
             return new LoginServiceResponse
@@ -68,7 +73,7 @@ namespace cityWatch_Project.Services.Implementations
                 Token = _jwtTokenGenerator.TokenGenerator(user),
                 Error = false,
                 ErrorMessage = "",
-                RefreshToken = refreshToken.Token
+                RefreshToken = newRefreshToken.Token
             };
         }
 
@@ -118,6 +123,7 @@ namespace cityWatch_Project.Services.Implementations
             await _userRepo.AddUserAsync(newUser);
 
             //Additional: create the refresh token and save it in the database
+
             var refreshToken = new RefreshToken
             {
                 Token = _jwtTokenGenerator.GenerateRefreshToken(),
@@ -126,8 +132,7 @@ namespace cityWatch_Project.Services.Implementations
                 Id = Guid.NewGuid()
             };
 
-            _dbConetext.RefreshTokens.Add(refreshToken);
-            await _dbConetext.SaveChangesAsync();
+            await _refreshTokenrepo.AddAsync(refreshToken);
 
             //6. return the relvant login response
             return new LoginServiceResponse
@@ -138,6 +143,31 @@ namespace cityWatch_Project.Services.Implementations
                 RefreshToken = refreshToken.Token
             };
 
+        }
+
+        public async Task<RefreshTokenDto> RefreshTokenHandler(RefreshTokenReqestDto refreshToken)
+        {
+            RefreshToken exisitngRefreshToken = await _dbConetext.RefreshTokens.Include(r => r.User).FirstOrDefaultAsync(r => r.Token == refreshToken.RefreshToken);
+
+            if (exisitngRefreshToken is null || exisitngRefreshToken.ExpiresOn < DateTime.UtcNow)
+            {
+                return null;
+            }
+
+            string accessToken = _jwtTokenGenerator.TokenGenerator(exisitngRefreshToken.User!);
+
+            //its a good practice to re makeing the refresh token right after using it 
+            exisitngRefreshToken.Token = _jwtTokenGenerator.GenerateRefreshToken();
+            exisitngRefreshToken.ExpiresOn = DateTime.UtcNow.AddDays(7);
+
+            //methna AsNoTracking() widiyt aran nathi hinda whenever api _dbContext.SaveChangesasync gahddi badu save wenwa database eke
+            await _dbConetext.SaveChangesAsync();
+
+            return new RefreshTokenDto
+            {
+                AccessToken = accessToken,
+                RefreshToken = exisitngRefreshToken.Token
+            };
         }
     }
 }
