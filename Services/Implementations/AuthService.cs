@@ -33,7 +33,8 @@ namespace cityWatch_Project.Services.Implementations
                 {
                     Token = string.Empty,
                     Error = true,
-                    ErrorMessage = "Cannot find the user"
+                    ErrorMessage = "Cannot find the user",
+                    RefreshToken = ""
 
                 };
             }
@@ -44,16 +45,30 @@ namespace cityWatch_Project.Services.Implementations
                 {
                     Token = string.Empty,
                     Error = true,
-                    ErrorMessage = "Wrong credentials"
+                    ErrorMessage = "Wrong credentials",
+                    RefreshToken = ""
                     
                 };
             }
+
+            var refreshToken = new RefreshToken
+            {
+                Id = Guid.NewGuid(),
+                UserID = user.UserID,
+                Token = _jwtTokenGenerator.GenerateRefreshToken(),
+                ExpiresOn = DateTime.UtcNow.AddDays(7)
+            };
+
+            _dbConetext.RefreshTokens.Add(refreshToken);
+            await _dbConetext.SaveChangesAsync();
+
 
             return new LoginServiceResponse
             {
                 Token = _jwtTokenGenerator.TokenGenerator(user),
                 Error = false,
-                ErrorMessage = ""
+                ErrorMessage = "",
+                RefreshToken = refreshToken.Token
             };
         }
 
@@ -102,10 +117,25 @@ namespace cityWatch_Project.Services.Implementations
             //5. save the user in the database
             await _userRepo.AddUserAsync(newUser);
 
+            //Additional: create the refresh token and save it in the database
+            var refreshToken = new RefreshToken
+            {
+                Token = _jwtTokenGenerator.GenerateRefreshToken(),
+                UserID = newUser.UserID,
+                ExpiresOn = DateTime.UtcNow.AddDays(7),
+                Id = Guid.NewGuid()
+            };
+
+            _dbConetext.RefreshTokens.Add(refreshToken);
+            await _dbConetext.SaveChangesAsync();
+
             //6. return the relvant login response
             return new LoginServiceResponse
             {
                 Token = _jwtTokenGenerator.TokenGenerator(newUser),
+                Error = false,
+                ErrorMessage = "",
+                RefreshToken = refreshToken.Token
             };
 
         }
