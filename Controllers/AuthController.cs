@@ -1,5 +1,6 @@
 ﻿using cityWatch_Project.DTOs.Auth;
 using cityWatch_Project.DTOs.Users;
+using cityWatch_Project.Models;
 using cityWatch_Project.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,7 @@ namespace cityWatch_Project.Controllers
             _authService = authService;
         }
 
+        //have to implement role base access to make only an admin make a admin account
         [HttpPost("register/admin")]
         public async Task<ActionResult<LoginResponseDTO>> RegisterAdmin(RegisterDTO registerDto)
         {
@@ -63,6 +65,7 @@ namespace cityWatch_Project.Controllers
             });
         }
 
+        // have to implement role base access for this end point to make only an admin can make a worker account 
         [HttpPost("register/worker")]
         public async Task<ActionResult<LoginResponseDTO>> RegisterUser(RegisterDTO registerDto)
         {
@@ -92,20 +95,29 @@ namespace cityWatch_Project.Controllers
             var result = await _authService.LoginAsync(loginDto);
             if (result.Error)
             {
-                var response = new LoginResponseDTO
+                return Unauthorized(new LoginResponseDTO
                 {
                     Error = true,
                     Token = "",
                     ErrorMessage = result.ErrorMessage,
-                };
+                });
             }
 
-            return StatusCode(500, new LoginResponseDTO
+            return Ok(new LoginResponseDTO
             {
                 Error = false,
                 ErrorMessage = "",
                 Token = result.Token!,
+                RefreshToken = result.RefreshToken
             });
+        }
+
+        [HttpPost("refresh")]
+        public async Task<ActionResult<RefreshTokenDto>> RefreshTokenGeneration(RefreshTokenReqestDto refreshToken)
+        {
+            var refreshTokenDto = await _authService.RefreshTokenHandler(refreshToken);
+
+            return Ok(refreshTokenDto);
         }
     }
 }
