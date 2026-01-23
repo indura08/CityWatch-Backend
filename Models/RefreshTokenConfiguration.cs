@@ -13,7 +13,7 @@ namespace cityWatch_Project.Models
             
             builder.HasIndex(r => r.Token).IsUnique();
             
-            builder.HasOne(r => r.user).WithMany().HasForeignKey(r => r.UserID);
+            builder.HasOne(r => r.User).WithMany().HasForeignKey(r => r.UserID);
         }
     }
 }
