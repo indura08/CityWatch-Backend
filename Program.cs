@@ -36,6 +36,7 @@ namespace cityWatch_Project
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<PasswordHasher>();
             builder.Services.AddScoped<JwtTokenGenerator>();
+            builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepositroy>();
 
             //adding jwt configuration
             builder.Services.Configure<JwtSettings>(

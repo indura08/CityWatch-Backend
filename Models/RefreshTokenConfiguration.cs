@@ -5,6 +5,7 @@ namespace cityWatch_Project.Models
 {
     internal sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
     {
+        //this class is to : Tell EF Core how to map the RefreshToken C# class to the database
         public void Configure(EntityTypeBuilder<RefreshToken> builder) 
         {
             builder.HasKey(r => r.Id);

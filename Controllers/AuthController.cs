@@ -1,7 +1,9 @@
 ﻿using cityWatch_Project.DTOs.Auth;
 using cityWatch_Project.DTOs.Users;
+using cityWatch_Project.Enums;
 using cityWatch_Project.Models;
 using cityWatch_Project.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,8 +19,15 @@ namespace cityWatch_Project.Controllers
         {
             _authService = authService;
         }
+        //this is to test the api is working succsfully
+        [HttpGet("help/hi")]
+        [Authorize(Roles="Admin")]
+        public IActionResult SayHi()
+        {
+            return Ok("Hellow from citywatch API");
+        }
 
-        //have to implement role base access to make only an admin make a admin account
+        [Authorize(Roles = "Admin")]
         [HttpPost("register/admin")]
         public async Task<ActionResult<LoginResponseDTO>> RegisterAdmin(RegisterDTO registerDto)
         {
@@ -29,7 +38,8 @@ namespace cityWatch_Project.Controllers
                 {
                     Error = true,
                     ErrorMessage = result.ErrorMessage,
-                    Token = ""
+                    Token = "",
+                    RefreshToken = result.RefreshToken
                 };
                 return StatusCode(500, response);
             }
@@ -38,7 +48,8 @@ namespace cityWatch_Project.Controllers
             {
                 Error = false,
                 Token = result.Token!,
-                ErrorMessage = ""
+                ErrorMessage = "",
+                RefreshToken = result.RefreshToken
             });
         }
 
@@ -61,11 +72,12 @@ namespace cityWatch_Project.Controllers
             {
                 Error = false,
                 Token = result.Token!,
-                ErrorMessage = ""
+                ErrorMessage = "no error",
+                RefreshToken = result.RefreshToken
             });
         }
 
-        // have to implement role base access for this end point to make only an admin can make a worker account 
+        [Authorize(Roles = "Admin")]
         [HttpPost("register/worker")]
         public async Task<ActionResult<LoginResponseDTO>> RegisterUser(RegisterDTO registerDto)
         {
@@ -85,7 +97,8 @@ namespace cityWatch_Project.Controllers
             {
                 Error = false,
                 Token = result.Token!,
-                ErrorMessage = ""
+                ErrorMessage = "",
+                RefreshToken = result.RefreshToken
             });
         }
 

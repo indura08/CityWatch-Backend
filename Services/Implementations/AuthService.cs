@@ -14,12 +14,12 @@ namespace cityWatch_Project.Services.Implementations
     public class AuthService : IAuthService
     {
         private readonly MainDBContext _dbConetext;
-        private readonly UserRepository _userRepo;
+        private readonly IUserRepository _userRepo;
         private readonly PasswordHasher _passwordHasher;
         private readonly JwtTokenGenerator _jwtTokenGenerator;
         private readonly IRefreshTokenRepository _refreshTokenrepo;
 
-        public AuthService(MainDBContext dbConetext, IRefreshTokenRepository refreshTokenRepository ,UserRepository repo, PasswordHasher passwordHasher, JwtTokenGenerator jwtTokenGenerator)
+        public AuthService(MainDBContext dbConetext, IRefreshTokenRepository refreshTokenRepository ,IUserRepository repo, PasswordHasher passwordHasher, JwtTokenGenerator jwtTokenGenerator)
         {
             _dbConetext = dbConetext;
             _passwordHasher = passwordHasher;
@@ -86,6 +86,9 @@ namespace cityWatch_Project.Services.Implementations
                 return new LoginServiceResponse
                 {
                     Token = string.Empty,
+                    Error = true,
+                    ErrorMessage = "User Already exists",
+                    RefreshToken = ""
                 };
             }
 

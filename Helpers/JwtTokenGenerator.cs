@@ -23,6 +23,7 @@ namespace cityWatch_Project.Helpers
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserID.ToString()),
+                //methan role part ek claims wal daanna one nattnm role abse access hdnna bari wenwa
                 new Claim(ClaimTypes.Role, user.Role.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
             };
