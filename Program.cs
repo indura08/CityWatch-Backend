@@ -7,6 +7,7 @@ using cityWatch_Project.Services.Implementations;
 using cityWatch_Project.Services.Interfaces;
 using cityWatch_Project.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -38,6 +39,10 @@ namespace cityWatch_Project
             builder.Services.AddScoped<JwtTokenGenerator>();
             builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepositroy>();
 
+            //incident related 
+            builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
+            builder.Services.AddScoped<IIncidentService, IncidentService>();
+
             //adding jwt configuration
             builder.Services.Configure<JwtSettings>(
                 builder.Configuration.GetSection("Jwt")
@@ -53,6 +58,12 @@ namespace cityWatch_Project
                         policy.AllowAnyOrigin();
                         policy.AllowAnyMethod();
                     });
+            });
+
+            //limiting httprequest size, so user does not upload anything larger to the system
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 10 * 1024 * 1024; //10mb only
             });
 
             builder.Services.AddAuthentication(options =>
@@ -96,6 +107,7 @@ namespace cityWatch_Project
 
             app.UseAuthorization();
 
+            app.UseStaticFiles();
 
             app.MapControllers();
 

@@ -38,12 +38,15 @@ namespace cityWatch_Project.Repositories.Implementations
         public async Task<Incident> GetIncidentByIdAsync(Guid id)
         {
             //meke find use kalam performance wadi mokda meka PK eknma check kerena nisa , first or default danna one nm onema property ekk ekkala puluwan hinda eka poddk performance madi
-            return await _dbContext.Incident.FindAsync(id);
+             var incident = await _dbContext.Incident.FindAsync(id);
+
+            if (incident == null) return null;
+            return incident;
         }
 
-        //public Task UpdateIncidentAsync(Incident incident)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task SaveChangesAsync()
+        {
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

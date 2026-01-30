@@ -8,7 +8,7 @@ namespace cityWatch_Project.Repositories.Interfaces
         Task CreateIncidentAsync(Incident incident);
         Task<List<Incident>> GetAllIncidentsAsync();
         Task<Incident> GetIncidentByIdAsync(Guid id);
-        //Task UpdateIncident(Incident incident);
+        Task SaveChangesAsync();
         Task DeleteIncidentByIdAsync(Guid id);
     }
 }
