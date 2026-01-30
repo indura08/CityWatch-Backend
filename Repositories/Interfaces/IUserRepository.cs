@@ -6,6 +6,7 @@ namespace cityWatch_Project.Repositories.Interfaces
     {
         Task<User> FindUserByEmail(string email);
         Task AddUserAsync(User user);
+        Task<User> FindUserByIdAsync(int id);
         
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using cityWatch_Project.Data;
@@ -11,9 +12,11 @@ using cityWatch_Project.Data;
 namespace cityWatch_Project.Migrations
 {
     [DbContext(typeof(MainDBContext))]
-    partial class MainDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260129180831_AddingIncidentTable")]
+    partial class AddingIncidentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,7 +52,7 @@ namespace cityWatch_Project.Migrations
                     b.Property<bool>("IsLocationVerified")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("LastUpdatedAt")
+                    b.Property<DateTime>("LastUpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<double>("Latitude")

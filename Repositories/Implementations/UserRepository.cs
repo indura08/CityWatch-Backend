@@ -29,5 +29,12 @@ namespace cityWatch_Project.Repositories.Implementations
 
             return user;
         }
+
+        public async Task<User> FindUserByIdAsync(int id)
+        {
+            var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserID == id);
+            if (user == null) return null!;
+            return user;
+        }
     }
 }
