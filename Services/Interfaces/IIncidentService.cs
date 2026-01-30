@@ -6,12 +6,12 @@ namespace cityWatch_Project.Services.Interfaces
 {
     public interface IIncidentService
     {
-        Task<string> CreateIncidentAsync(NewIncidentDto incidentDto);
+        Task<IncidentServiceResponse> CreateIncidentAsync(NewIncidentDto incidentDto);
         Task<List<Incident>> GetAllIncidentsAsync();
         Task<Incident> GetIncidentByIdAsync(Guid id);
-        Task<string> DeleteIncidentByIdAsync(Guid id);
-        Task<string> AssignWorkerToIncidentAsync(Guid incidentId, int workerId);
-        Task<string> UpdateIncidentStatus(Guid incidentId, IncidentStatus status);
-        Task<string> UpdateIncident(Guid incidentId, NewIncidentDto incidentDto, int reportedUserID);
+        Task<IncidentServiceResponse> DeleteIncidentByIdAsync(Guid id, int userId);
+        Task<IncidentServiceResponse> AssignWorkerToIncidentAsync(Guid incidentId, int workerId);
+        Task<IncidentServiceResponse> UpdateIncidentStatus(Guid incidentId, IncidentStatus status);
+        Task<IncidentServiceResponse> UpdateIncident(Guid incidentId, NewIncidentDto incidentDto, int reportedUserID);
     }
 }

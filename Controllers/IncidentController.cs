@@ -1,4 +1,5 @@
 ﻿using cityWatch_Project.DTOs.Incidents;
+using cityWatch_Project.Enums;
 using cityWatch_Project.Models;
 using cityWatch_Project.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +19,7 @@ namespace cityWatch_Project.Controllers
             _incidentService = incidentService;
         }
 
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<ActionResult<IncidentResponseDto<List<Incident>>>> GetAllIncidentsAsync()
         {
             var incidentList = await _incidentService.GetAllIncidentsAsync();
@@ -31,24 +32,109 @@ namespace cityWatch_Project.Controllers
             });
         }
 
+        [HttpPost("create")]
+        [Authorize(Roles = "Admin,Citizen,Worker")]
         public async Task<ActionResult<IncidentResponseDtoNoData>> CreateNewIncidentAsync(NewIncidentDto incidentDto)
         {
-            var message = await _incidentService.CreateIncidentAsync(incidentDto);
-            if (message == "No data to create a new incident" || message == "Reported user cannot be found")
+            var result = await _incidentService.CreateIncidentAsync(incidentDto);
+            if (result.Success == false)
             {
                 return BadRequest(new IncidentResponseDtoNoData
                 {
                     Error = true,
-                    Message = message
+                    Message = result.Message
                 });
             }
 
             return Ok(new IncidentResponseDtoNoData
             {
                 Error = false,
-                Message = message
+                Message = result.Message
             });
 
         }
+
+        [HttpGet("assign/worker")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IncidentResponseDto<string>>> AssignWorkerToIncident(Guid incidentId, int WorkerId)
+        {
+            var result = await _incidentService.AssignWorkerToIncidentAsync(incidentId, WorkerId);
+
+            if(result.Success == false)
+            {
+                return BadRequest(new IncidentResponseDto<string>
+                {
+                    Error = true,
+                    ErrorMessage = result.Message,
+                    Data = null
+                });
+            }
+
+            return Ok(new IncidentResponseDto<string>
+            {
+                Error = false,
+                ErrorMessage = null,
+                Data = result.Message
+            });
+        }
+
+        [HttpDelete("delete/{id}")]
+        [Authorize(Roles = "Admin,Citizen")]
+        public async Task<ActionResult<IncidentResponseDto<string>>> DeleteIncidentById(Guid id, int userId)
+        {
+            var result = await _incidentService.DeleteIncidentByIdAsync(id, userId);
+            if (result.Success == false) return BadRequest(new IncidentResponseDto<string>
+            {
+                Error = true,
+                ErrorMessage = result.Message,
+                Data = null
+            });
+            
+            return Ok(new IncidentResponseDto<string>
+            {
+                Error = false,
+                ErrorMessage = null,
+                Data = result.Message
+            });
+        }
+
+        [HttpPost("update/status/{id}")]
+        [Authorize(Roles = "Admin,Worker")]
+        public async Task<ActionResult<IncidentResponseDto<string>>> UpdateIncidentStatus(Guid id, IncidentStatus status)
+        {
+            var result = await _incidentService.UpdateIncidentStatus(id, status);
+            if (result.Success == false) return BadRequest(new IncidentResponseDto<string>
+            {
+                Error = true,
+                ErrorMessage = result.Message,
+                Data = null
+            });
+
+            return Ok(new IncidentResponseDto<string>
+            {
+                Error = false,
+                ErrorMessage = null,
+                Data = result.Message
+            });
+        }
+
+        public async Task<ActionResult<IncidentResponseDto<string>>> UpdateIncident(Guid id, NewIncidentDto incidentDto, int userId)
+        {
+            var result = await _incidentService.UpdateIncident(id, incidentDto, userId);
+            if (result.Success == false) return BadRequest(new IncidentResponseDto<string>
+            {
+                Error = false,
+                ErrorMessage = result.Message,
+                Data = null
+            });
+
+            return Ok(new IncidentResponseDto<string>
+            {
+                Error = false,
+                ErrorMessage = null,
+                Data = result.Message
+            });
+        }
+
     }
 }

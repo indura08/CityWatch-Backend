@@ -18,12 +18,22 @@ namespace cityWatch_Project.Services.Implementations
             _userRepository = userrepo;
             _webHostEnvironment = webHostEnv;
         }
-        public async Task<string> CreateIncidentAsync(NewIncidentDto incidentDto)
+        public async Task<IncidentServiceResponse> CreateIncidentAsync(NewIncidentDto incidentDto)
         {
-            if (incidentDto == null) return "No data to create a new incident";
+            if (incidentDto == null) return new IncidentServiceResponse 
+            {
+                Success = false,
+                Message = "Please enter values to adda new incident"
+            };
+
+            Console.WriteLine($"ReportedByUserId = {incidentDto.ReportedByUserId}");
 
             var ReportedUser = await _userRepository.FindUserByIdAsync(incidentDto.ReportedByUserId);
-            if (ReportedUser == null) return "Reported user cannot be found";
+            if (ReportedUser == null) return new IncidentServiceResponse 
+            {
+                Success = false,
+                Message = "Reported user cannot be found"
+            };
 
             Incident incident = new Incident
             {
@@ -53,16 +63,34 @@ namespace cityWatch_Project.Services.Implementations
                 incident.ImageUrl = filePath;
             }
 
-            return "Incident created";
+            return new IncidentServiceResponse 
+            {
+                Success = true,
+                Message = "Reported user cannot be found"
+            };
         }
 
-        public async Task<string> DeleteIncidentByIdAsync(Guid id)
+        public async Task<IncidentServiceResponse> DeleteIncidentByIdAsync(Guid id, int userId)
         {
             var currentIncident = await _incidentRepository.GetIncidentByIdAsync(id);
-            if (currentIncident == null) return "Incident cannot be found";
+            if (currentIncident == null) return new IncidentServiceResponse 
+            {
+                Success = false,
+                Message = "Incident cannot be found"
+            };
+
+            if (currentIncident.ReportedByUserId != userId) return new IncidentServiceResponse
+            {
+                Success = false,
+                Message = "You are not the one who reported the incident, hence you cannot delete this"
+            };
 
             await _incidentRepository.DeleteIncidentByIdAsync(id);
-            return "Incident successfully deleted";
+            return new IncidentServiceResponse 
+            {
+                Success = true,
+                Message = "Incident successfully deleted"
+            };
         }
 
         public async Task<List<Incident>> GetAllIncidentsAsync()
@@ -77,40 +105,73 @@ namespace cityWatch_Project.Services.Implementations
             return incident;
         }
 
-        public async Task<string> AssignWorkerToIncidentAsync(Guid incidentId, int workerId) 
+        public async Task<IncidentServiceResponse> AssignWorkerToIncidentAsync(Guid incidentId, int workerId) 
         {
             var incident = await _incidentRepository.GetIncidentByIdAsync(incidentId);
-            if (incident == null) return "Incident could not be found";
+            if (incident == null) return new IncidentServiceResponse 
+            {
+                Success = false,
+                Message = "Incident could not be found"
+            };
 
             var workerUser = await _userRepository.FindUserByIdAsync(workerId);
 
-            if (workerUser == null) return $"Worker with id: {workerId} user cannot be found";
-            if (workerUser.Role != Enums.Role.Worker) return "Selected user is not a worker, please check again";
+            if (workerUser == null) return new IncidentServiceResponse 
+            {
+                Success = true,
+                Message = $"Worker with id: {workerId} user cannot be found"
+            };
+            if (workerUser.Role != Enums.Role.Worker) return new IncidentServiceResponse 
+            {
+                Success = false,
+                Message = "Selected user is not a worker, please check again"
+            };
 
             incident.AssignedTo = workerUser;
             await _incidentRepository.SaveChangesAsync();
 
-            return $"Worker user with id: {workerId} assigned to the incident successfully";
+            return new IncidentServiceResponse 
+            {
+                Success = true,
+                Message = $"Worker user with id: {workerId} assigned to the incident successfully"
+            };
         }
 
-        public async Task<string> UpdateIncidentStatus(Guid incidentId, IncidentStatus incidentStatus) 
+        public async Task<IncidentServiceResponse> UpdateIncidentStatus(Guid incidentId, IncidentStatus incidentStatus) 
         {
             var incident = await _incidentRepository.GetIncidentByIdAsync(incidentId);
-            if (incident == null) return "Incident cannot be found";
+            if (incident == null) return new IncidentServiceResponse 
+            {
+                Success = false,
+                Message = "Incident cannot be found"
+            };
 
             incident.Status = incidentStatus;
             incident.LastUpdatedAt = DateTime.UtcNow;
 
             await _incidentRepository.SaveChangesAsync();
-            return "Incident status changed successfully";
+            return new IncidentServiceResponse
+            {
+                Success = true,
+                Message = "Incident status changed successfully"
+            };
 
         }
 
-        public async Task<string> UpdateIncident(Guid incidentId, NewIncidentDto incidentDto, int reportedUserId)
+        public async Task<IncidentServiceResponse> UpdateIncident(Guid incidentId, NewIncidentDto incidentDto, int reportedUserId)
         {
             var incident = await _incidentRepository.GetIncidentByIdAsync(incidentId);
-            if (incident == null) return $"Incident with id {incidentId} couldn't be found";
-            if (incident.ReportedByUserId != reportedUserId) return "You cannot edit this since you are not the user who reported this";
+            if (incident == null) return new IncidentServiceResponse
+            {
+                Success = false,
+                Message = $"Incident with id {incidentId} couldn't be found"
+            };
+
+            if (incident.ReportedByUserId != reportedUserId) return new IncidentServiceResponse
+            {
+                Success = false,
+                Message = "You cannot edit this since you are not the user who reported this"
+            };
 
             incident.Description = incidentDto.Description;
             incident.LastUpdatedAt = DateTime.UtcNow;
@@ -123,7 +184,12 @@ namespace cityWatch_Project.Services.Implementations
             //anything else cannot be updated due to business logic i have created.
 
             await _incidentRepository.SaveChangesAsync();
-            return "Incident succesfully updated";
+            return new IncidentServiceResponse
+            {
+                Success = true,
+                Message = "Incident succesfully updated"
+            };
         }
     }
 }
+
