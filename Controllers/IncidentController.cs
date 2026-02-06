@@ -80,7 +80,7 @@ namespace cityWatch_Project.Controllers
 
         [HttpDelete("delete/{id}")]
         [Authorize(Roles = "Admin,Citizen")]
-        public async Task<ActionResult<IncidentResponseDto<string>>> DeleteIncidentById(Guid id, int userId)
+        public async Task<ActionResult<IncidentResponseDto<string>>> DeleteIncidentById(Guid id, [FromBody] int? userId)
         {
             var result = await _incidentService.DeleteIncidentByIdAsync(id, userId);
             if (result.Success == false) return BadRequest(new IncidentResponseDto<string>
@@ -98,9 +98,9 @@ namespace cityWatch_Project.Controllers
             });
         }
 
-        [HttpPost("update/status/{id}")]
+        [HttpPut("update/status/{id}")]
         [Authorize(Roles = "Admin,Worker")]
-        public async Task<ActionResult<IncidentResponseDto<string>>> UpdateIncidentStatus(Guid id, IncidentStatus status)
+        public async Task<ActionResult<IncidentResponseDto<string>>> UpdateIncidentStatus(Guid id, [FromBody] IncidentStatusChangeDto status)
         {
             var result = await _incidentService.UpdateIncidentStatus(id, status);
             if (result.Success == false) return BadRequest(new IncidentResponseDto<string>
@@ -118,7 +118,10 @@ namespace cityWatch_Project.Controllers
             });
         }
 
-        public async Task<ActionResult<IncidentResponseDto<string>>> UpdateIncident(Guid id, NewIncidentDto incidentDto, int userId)
+
+        [HttpPut("update/{id}")]
+        [Authorize(Roles = "Admin,Citizen")]
+        public async Task<ActionResult<IncidentResponseDto<string>>> UpdateIncident(Guid id, NewIncidentDto incidentDto, int? userId)
         {
             var result = await _incidentService.UpdateIncident(id, incidentDto, userId);
             if (result.Success == false) return BadRequest(new IncidentResponseDto<string>

@@ -9,9 +9,9 @@ namespace cityWatch_Project.Services.Interfaces
         Task<IncidentServiceResponse> CreateIncidentAsync(NewIncidentDto incidentDto);
         Task<List<Incident>> GetAllIncidentsAsync();
         Task<Incident> GetIncidentByIdAsync(Guid id);
-        Task<IncidentServiceResponse> DeleteIncidentByIdAsync(Guid id, int userId);
+        Task<IncidentServiceResponse> DeleteIncidentByIdAsync(Guid id, int? userId);
         Task<IncidentServiceResponse> AssignWorkerToIncidentAsync(Guid incidentId, int workerId);
-        Task<IncidentServiceResponse> UpdateIncidentStatus(Guid incidentId, IncidentStatus status);
-        Task<IncidentServiceResponse> UpdateIncident(Guid incidentId, NewIncidentDto incidentDto, int reportedUserID);
+        Task<IncidentServiceResponse> UpdateIncidentStatus(Guid incidentId, IncidentStatusChangeDto status);
+        Task<IncidentServiceResponse> UpdateIncident(Guid incidentId, NewIncidentDto incidentDto, int? reportedUserID);
     }
 }
