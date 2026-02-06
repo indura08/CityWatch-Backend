@@ -47,13 +47,14 @@ namespace cityWatch_Project.Services.Implementations
                 LocationSource = incidentDto.LocationSource,
                 IsLocationVerified = incidentDto.IsLocationVerified,
                 ReportedByUserId = incidentDto.ReportedByUserId,
-                ReportedBy = ReportedUser,
+                //ReportedBy = ReportedUser,
             };
 
             if (incidentDto.Image != null)
             {
-                string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "Images");
+                string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "IncidentImages");
                 string fileName = incidentDto.Image.FileName;
+                Console.WriteLine($"file name is : ${fileName}");
                 string filePath = Path.Combine(uploadDir, fileName);
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
@@ -63,10 +64,12 @@ namespace cityWatch_Project.Services.Implementations
                 incident.ImageUrl = filePath;
             }
 
+            await _incidentRepository.CreateIncidentAsync(incident);
+
             return new IncidentServiceResponse 
             {
                 Success = true,
-                Message = "Reported user cannot be found"
+                Message = "Incident Created Successfully"
             };
         }
 
@@ -127,7 +130,8 @@ namespace cityWatch_Project.Services.Implementations
                 Message = "Selected user is not a worker, please check again"
             };
 
-            incident.AssignedTo = workerUser;
+            incident.AssignedToUserID = workerUser.UserID;
+            incident.LastUpdatedAt = DateTime.UtcNow;
             await _incidentRepository.SaveChangesAsync();
 
             return new IncidentServiceResponse 

@@ -54,11 +54,11 @@ namespace cityWatch_Project.Controllers
 
         }
 
-        [HttpGet("assign/worker")]
+        [HttpPut("assign/worker")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IncidentResponseDto<string>>> AssignWorkerToIncident(Guid incidentId, int WorkerId)
+        public async Task<ActionResult<IncidentResponseDto<string>>> AssignWorkerToIncident([FromBody] AssignWorkerDto assignWorkerDto)
         {
-            var result = await _incidentService.AssignWorkerToIncidentAsync(incidentId, WorkerId);
+            var result = await _incidentService.AssignWorkerToIncidentAsync(assignWorkerDto.IncidentId, assignWorkerDto.WorkerId);
 
             if(result.Success == false)
             {

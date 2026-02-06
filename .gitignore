@@ -70,3 +70,6 @@ desktop.ini
 
 ## Optional: Build / publish settings
 *.publishsettings
+
+##wwwroot Folder
+wwwroot
